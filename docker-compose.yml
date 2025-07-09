@@ -1,0 +1,64 @@
+version: '3.8'
+services:
+  user-service:
+    build: ./backend/user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/userdb
+    depends_on:
+      - mongo
+
+  reservation-service:
+    build: ./backend/reservation-service
+    ports:
+      - "3002:3002"
+    environment:
+      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/reservationdb
+    depends_on:
+      - mongo
+
+  food-service:
+    build: ./backend/food-service
+    ports:
+      - "3003:3003"
+    environment:
+      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/fooddb
+    depends_on:
+      - mongo
+
+  order-service:
+    build: ./backend/order-service
+    ports:
+      - "3004:3004"
+    environment:
+      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/orderdb
+    depends_on:
+      - mongo
+
+  api-gateway:
+    build: ./backend/api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-service
+      - reservation-service
+      - food-service
+      - order-service
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - api-gateway
+
+  mongo:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data: 
