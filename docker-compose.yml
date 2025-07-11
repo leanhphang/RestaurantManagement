@@ -3,43 +3,43 @@ services:
   user-service:
     build: ./backend/user-service
     ports:
-      - "3001:3001"
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
     environment:
-      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/userdb
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${USER_DB}
     depends_on:
       - mongo
 
   reservation-service:
     build: ./backend/reservation-service
     ports:
-      - "3002:3002"
+      - "${RESERVATION_SERVICE_PORT}:${RESERVATION_SERVICE_PORT}"
     environment:
-      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/reservationdb
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${RESERVATION_DB}
     depends_on:
       - mongo
 
   food-service:
     build: ./backend/food-service
     ports:
-      - "3003:3003"
+      - "${FOOD_SERVICE_PORT}:${FOOD_SERVICE_PORT}"
     environment:
-      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/fooddb
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${FOOD_DB}
     depends_on:
       - mongo
 
   order-service:
     build: ./backend/order-service
     ports:
-      - "3004:3004"
+      - "${ORDER_SERVICE_PORT}:${ORDER_SERVICE_PORT}"
     environment:
-      - MONGO_URI=mongodb+srv://duclinhhopham:duclinh2503@cluster0.tsq9ujm.mongodb.net/orderdb
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${ORDER_DB}
     depends_on:
       - mongo
 
   api-gateway:
     build: ./backend/api-gateway
     ports:
-      - "3000:3000"
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     depends_on:
       - user-service
       - reservation-service
@@ -49,14 +49,14 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "4000:4000"
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
       - api-gateway
 
   mongo:
     image: mongo:6
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT}:${MONGO_PORT}"
     volumes:
       - mongo-data:/data/db
 
