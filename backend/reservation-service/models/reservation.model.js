@@ -47,6 +47,10 @@ const reservationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Table",
     },
+    isWalkIn: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
