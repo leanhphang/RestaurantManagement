@@ -1,10 +1,20 @@
 const Food = require('../models/Food');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const Category = require('../models/Category');
 
 // Tạo mới food
 exports.createFood = async (req, res) => {
   try {
+    // Kiểm tra categoryId hợp lệ và tồn tại
+    const { categoryId } = req.body;
+    if (!categoryId || !categoryId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: 'categoryId không hợp lệ' });
+    }
+    const category = await Category.findById(categoryId);
+    if (!category) {
+      return res.status(400).json({ error: 'Category không tồn tại' });
+    }
     let imageUrl = '';
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
@@ -40,6 +50,16 @@ exports.getFoodById = async (req, res) => {
     const food = await Food.findById(req.params.id);
     if (!food) return res.status(404).json({ error: 'Food not found' });
     res.json(food);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Lấy danh sách món ăn theo categoryId
+exports.getFoodsByCategory = async (req, res) => {
+  try {
+    const foods = await Food.find({ categoryId: req.params.categoryId });
+    res.json(foods);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
