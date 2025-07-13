@@ -13,6 +13,12 @@ app.use(express.json());
 // Kết nối database
 connectDB();
 
+const categoryRoutes = require('./routes/categoryRoutes');
+const foodRoutes = require('./routes/foodRoutes');
+
+app.use('/api/categories', categoryRoutes);
+app.use('/api/foods', foodRoutes);
+
 // Route mẫu
 app.get('/', (req, res) => {
   res.json({ message: 'Food Service is running!' });
