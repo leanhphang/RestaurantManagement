@@ -36,6 +36,24 @@ services:
     depends_on:
       - mongo
 
+  table-service:
+    build: ./backend/table-service
+    ports:
+      - "${TABLE_SERVICE_PORT}:${TABLE_SERVICE_PORT}"
+    environment:
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${TABLE_DB}
+    depends_on:
+      - mongo
+
+  payment-service:
+    build: ./backend/payment-service
+    ports:
+      - "${PAYMENT_SERVICE_PORT}:${PAYMENT_SERVICE_PORT}"
+    environment:
+      - MONGO_URI=mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${PAYMENT_DB}
+    depends_on:
+      - mongo
+
   api-gateway:
     build: ./backend/api-gateway
     ports:
@@ -45,6 +63,8 @@ services:
       - reservation-service
       - food-service
       - order-service
+      - table-service
+      - payment-service
 
   frontend:
     build: ./frontend

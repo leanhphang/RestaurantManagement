@@ -13,7 +13,9 @@ Restaurant-Management/
 │   ├── user-service/
 │   ├── reservation-service/
 │   ├── food-service/
-│   └── order-service/
+│   ├── order-service/
+│   ├── table-service/
+│   └── payment-service/
 │
 ├── frontend/
 │
@@ -26,12 +28,27 @@ Restaurant-Management/
 - **docker-compose.yml**: Quản lý các container
 
 ## Các service backend & cổng sử dụng
-- **api-gateway**: Định tuyến request giữa frontend và các service (**cổng 3000**)
-- **user-service**: Đăng ký, đăng nhập, phân quyền, quản lý người dùng (**cổng 3001**)
-- **reservation-service**: Đặt bàn, check-in, hủy lịch, kiểm tra bàn trống (**cổng 3002**)
-- **food-service**: Quản lý thực đơn, trạng thái món ăn (**cổng 3003**)
-- **order-service**: Gọi món, chỉnh sửa đơn hàng, cập nhật trạng thái đơn (**cổng 3004**)
-- **frontend**: Giao diện người dùng (**cổng 4000**)
+
+1. **User Service** (port **3001**)
+   - Chức năng: Quản lý nhân sự
+   - Bảng dữ liệu: `User`
+2. **Reservation Service** (port **3002**)
+   - Chức năng: Quản lý đặt bàn, khách hàng, và lịch sử sử dụng bàn
+   - Bảng dữ liệu: `Reservation`, `Customer`
+3. **Food Service** (port **3003**)
+   - Chức năng: Quản lý thực đơn
+   - Bảng dữ liệu: `Food`, `Category`
+4. **Order Service** (port **3004**)
+   - Chức năng: Quản lý đơn hàng, gọi món theo từng bàn
+   - Bảng dữ liệu: `Order`, `OrderItems`
+5. **Table Service** (port **3005**)
+   - Chức năng: Quản lý thông tin các bàn trong nhà hàng
+   - Bảng dữ liệu: `Table`
+6. **Payment Service** (port **3006**)
+   - Chức năng: Quản lý thanh toán
+   - Bảng dữ liệu: `Payment`
+7. **api-gateway**: Định tuyến request giữa frontend và các service (**cổng 3000**)
+8. **frontend**: Giao diện người dùng (**cổng 4000**)
 
 ## Hướng dẫn khởi chạy
 
@@ -55,7 +72,7 @@ npm install
   cp .env.example .env # hoặc tự tạo file .env theo mẫu
   # Chỉnh sửa các biến môi trường nếu cần
   ```
-- Làm tương tự với các service khác: reservation-service, food-service, order-service, api-gateway
+- Làm tương tự với các service khác: reservation-service, food-service, order-service, table-service, payment-service, api-gateway
 
 ### 4. Chạy service ở chế độ dev
 ```bash
@@ -74,6 +91,8 @@ npm run dev
 - Reservation Service: http://localhost:3002
 - Food Service: http://localhost:3003
 - Order Service: http://localhost:3004
+- Table Service: http://localhost:3005
+- Payment Service: http://localhost:3006
 - API Gateway: http://localhost:3000
 - Frontend: http://localhost:4000
 
