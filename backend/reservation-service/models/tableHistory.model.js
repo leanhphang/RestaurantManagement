@@ -11,12 +11,12 @@ const tableHistorySchema = new mongoose.Schema({
     ref: "Table",
     required: true,
   },
-  assignedAt: {
+  assignedTime: {
     type: Date,
     default: Date.now,
   },
   assignedBy: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
   checkInTime: {
@@ -28,11 +28,12 @@ const tableHistorySchema = new mongoose.Schema({
   },
   tableStatus: {
     type: String,
-    enum: ["Available", "Occupied", "Reserved", "Unavailable"],
+    enum: ["Available", "Occupied", "Pending", "Unavailable"],
     default: "Available",
   },
   note: {
     type: String,
+    default: "",
   },
 });
 

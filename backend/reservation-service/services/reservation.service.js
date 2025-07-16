@@ -1,21 +1,65 @@
 import reservationModel from "../models/reservation.model.js";
+import tableHistoryModel from "../models/tableHistory.model.js";
+import { mockTables } from "../data/mockTables.js";
+import customerModel from "../models/customer.model.js";
+import mongoose from "mongoose";
 
 const reservationService = {
   createReservation: async (data) => {
-    const { quantity, checkInTime } = data;
+    const {
+      customerName,
+      customerPhone,
+      customerEmail,
+      quantity,
+      checkInTime,
+      note,
+      isWalkIn,
+    } = data;
+    let customerId = null;
+    if (!isWalkIn) {
+      let customer = await customerModel.findOne({
+        $or: [{ phone: customerPhone }, { email: customerEmail }],
+      });
+      if (!customer) {
+        customer = await customerModel.create({
+          name: customerName,
+          phone: customerPhone,
+          email: customerEmail,
+        });
+      }
 
-    data.checkInTime = new Date(checkInTime);
+      customerId = customer._id;
 
+      const checkIn = new Date(checkInTime);
+      const fromTime = new Date(checkIn.getTime() - 2 * 60 * 60 * 1000);
+      const toTime = new Date(checkIn.getTime() + 2 * 60 * 60 * 1000);
+
+      const existingReservation = await reservationModel.findOne({
+        customerId: customer._id,
+        checkInTime: { $gte: fromTime, $lte: toTime },
+        status: { $ne: "Cancelled" },
+      });
+
+      if (existingReservation) {
+        throw new Error("Customer already have reservation at this time!");
+      }
+    }
     data.deposit = quantity >= 6 ? 100000 : 0;
 
-    const reservation = await reservationModel.create(data);
-
-    reservation.statusHistory.push({
-      status: "Pending",
-      changeAt: new Date(),
+    const reservation = await reservationModel.create({
+      customerId,
+      quantity,
+      checkInTime,
+      note: note || "",
+      isWalkIn: isWalkIn === true,
+      deposit: data.deposit,
+      statusHistory: [
+        {
+          status: "Pending",
+          changeAt: new Date(),
+        },
+      ],
     });
-
-    await reservation.save();
 
     return reservation;
   },
@@ -30,6 +74,64 @@ const reservationService = {
       .find({ customerPhone: phone })
       .sort({ checkInTime: 1 });
     return reservations;
+  },
+
+  getAvailableTables: async (checkInTime, quantity) => {
+    if (!checkInTime) {
+      throw new Error("Invalid check-in time");
+    }
+    if (!quantity || isNaN(quantity)) {
+      throw new Error("Invalid quantity provided");
+    }
+    const time = new Date(checkInTime);
+    const allHistories = await tableHistoryModel.find({
+      assignedTime: {
+        $gte: new Date(time.getTime() - 2 * 60 * 60 * 1000),
+        $lte: new Date(time.getTime() + 2 * 60 * 60 * 1000),
+      },
+    });
+    const reservedTables = new Set(
+      allHistories.map((h) => h.tableId.toString())
+    );
+    const availableTables = mockTables.filter(
+      (table) =>
+        table.capacity >= Number(quantity) &&
+        !reservedTables.has(table._id.toString())
+    );
+    return availableTables;
+  },
+
+  assignTable: async (reservationId, tableId, staffId) => {
+    const reservation = await reservationModel.findById(reservationId);
+    if (!reservation) throw new Error("Reservation not found");
+    const checkInTime = reservation.checkInTime;
+    const startTime = new Date(checkInTime.getTime() - 2 * 60 * 60 * 1000);
+    const endTime = new Date(checkInTime.getTime() + 2 * 60 * 60 * 1000);
+
+    const isAlreadyAssigned = await tableHistoryModel.exists({
+      tableId: tableId,
+      assignedTime: { $gte: startTime, $lte: endTime },
+    });
+
+    if (isAlreadyAssigned) {
+      throw new Error("Table already assigned during this time");
+    }
+
+    const historyData = {
+      reservationId: reservation._id,
+      tableId,
+      checkInTime: reservation.checkInTime,
+      assignedTime: new Date(),
+      tableStatus: "Pending",
+    };
+    if (staffId && mongoose.Types.ObjectId.isValid(staffId)) {
+      historyData.assignedBy = staffId;
+    }
+    const history = await tableHistoryModel.create(historyData);
+    reservation.tableHistory.push(history._id);
+    reservation.tableId = tableId;
+    await reservation.save();
+    return reservation;
   },
 
   cancelReservation: async (id) => {

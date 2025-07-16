@@ -2,17 +2,12 @@ import mongoose from "mongoose";
 
 const reservationSchema = new mongoose.Schema(
   {
-    customerName: {
-      type: String,
-      required: true,
-    },
-    customerPhone: {
-      type: String, // do để number thì không lưu được số 0 đầu
-      required: true,
-    },
-    customerEmail: {
-      type: String,
-      required: true,
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: function () {
+        return !this.isWalkIn;
+      },
     },
     quantity: {
       type: Number,
@@ -51,7 +46,7 @@ const reservationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    tableHistories: [
+    tableHistory: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "TableHistory",

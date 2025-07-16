@@ -13,6 +13,12 @@ const reservationController = {
       });
     } catch (error) {
       console.error("Error creating reservation: ", error);
+      if (error.message === "Customer already have reservation at this time!") {
+        return res.status(404).json({
+          message: error.message,
+          success: false,
+        });
+      }
       res
         .status(500)
         .json({ message: "Internal server error", success: false });
@@ -20,7 +26,41 @@ const reservationController = {
   },
 
   assignTable: async (req, res) => {
-    res.send("Assign table to reservation endpoint");
+    try {
+      const { id } = req.params;
+      const { tableId } = req.body;
+      const staffId = req.user?.id;
+      const updatedReservation = await reservationService.assignTable(
+        id,
+        tableId,
+        staffId
+      );
+      console.log("StaffId: ", staffId);
+      res.status(200).json({
+        message: "Table assigned successfully",
+        reservation: updatedReservation,
+        success: true,
+      });
+    } catch (error) {
+      console.error("Error assigning table: ", error);
+
+      if (error.message === "Table already assigned during this time") {
+        return res.status(400).json({
+          message: error.message,
+          success: false,
+        });
+      }
+      if (error.message === "Reservation not found") {
+        return res.status(404).json({
+          message: error.message,
+          success: false,
+        });
+      }
+      res.status(500).json({
+        message: "Internal server error",
+        success: false,
+      });
+    }
   },
 
   checkInReservation: async (req, res) => {
@@ -85,6 +125,39 @@ const reservationController = {
       res
         .status(500)
         .json({ message: "Internal server error", success: false });
+    }
+  },
+
+  getAvailableTables: async (req, res) => {
+    try {
+      const { checkInTime, quantity } = req.query;
+      const tables = await reservationService.getAvailableTables(
+        checkInTime,
+        quantity
+      );
+      res.status(200).json({
+        message: "Available tables fetched successfully",
+        tables: tables,
+        success: true,
+      });
+    } catch (error) {
+      console.error("Error fetching available tables: ", error);
+      if (error.message === "Invalid check-in time") {
+        return res.status(404).json({
+          message: error.message,
+          success: false,
+        });
+      }
+      if (error.message === "Invalid quantity provided") {
+        return res.status(404).json({
+          message: error.message,
+          success: false,
+        });
+      }
+      res.status(500).json({
+        message: "Internal server error",
+        success: false,
+      });
     }
   },
 

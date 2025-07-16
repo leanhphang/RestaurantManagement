@@ -1,22 +1,25 @@
 const reservationMiddleware = {
   validateReservationInput: (req, res, next) => {
     const data = req.body;
+    const isWalkIn = data.isWalkIn === true;
 
-    const requiredFields = [
-      "customerName",
-      "customerPhone",
-      "customerEmail",
-      "quantity",
-      "checkInTime",
-    ];
-
-    for (let fields of requiredFields) {
-      if (!data[fields]) {
-        return res.status(400).json({
-          message: `${fields} is required`,
-          success: false,
-        });
+    if (!isWalkIn) {
+      const requiredFields = ["customerName", "customerPhone", "customerEmail"];
+      for (let fields of requiredFields) {
+        if (!data[fields]) {
+          return res.status(400).json({
+            message: `${fields} is required for non walk-in reservation`,
+            success: false,
+          });
+        }
       }
+    }
+
+    if (!data.quantity) {
+      return res.status(400).json({
+        message: "Quantity is required",
+        success: false,
+      });
     }
 
     if (typeof data.quantity !== "number" || data.quantity <= 0) {
@@ -26,6 +29,12 @@ const reservationMiddleware = {
       });
     }
 
+    if (!data.checkInTime) {
+      return res.status(400).json({
+        message: "Check-in time is required",
+        success: false,
+      });
+    }
     next();
   },
 
