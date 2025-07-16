@@ -13,6 +13,11 @@ app.use(express.json());
 // Kết nối database
 connectDB();
 
+// Sử dụng routes cho Order và OrderItem
+app.use('/api/orders', require('./routes/orderRoutes'));
+app.use('/api/order-items', require('./routes/orderItemRoutes'));
+app.use('/mock', require('./routes/mockRoutes'));
+
 // Route mẫu
 app.get('/', (req, res) => {
   res.json({ message: 'Order Service is running!' });
