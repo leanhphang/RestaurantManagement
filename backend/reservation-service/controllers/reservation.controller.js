@@ -19,6 +19,12 @@ const reservationController = {
           success: false,
         });
       }
+      if (error.message === "No available tables at this time") {
+        return res.status(404).json({
+          message: error.message,
+          success: false,
+        });
+      }
       res
         .status(500)
         .json({ message: "Internal server error", success: false });
