@@ -3,11 +3,22 @@
   "version": "1.0.0",
   "description": "Đây là hệ thống web quản lý nhà hàng – khách sạn được thiết kế theo mô hình Microservice kết hợp với kiến trúc MVC, sử dụng MERN stack nhằm hỗ trợ quy trình đặt bàn, phục vụ món ăn và quản lý vận hành nhà hàng một cách linh hoạt và mở rộng dễ dàng.",
   "main": "index.js",
+
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./server.js"
+
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.3",
+    "nodemon": "^3.1.10"
+  }
 }
